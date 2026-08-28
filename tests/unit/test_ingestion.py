@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from pathlib import Path
 
 import pytest
@@ -22,7 +22,7 @@ from src.ingestion.base import IngestionStats
 class TestSecurityEventModel:
     def test_security_event_defaults_and_nullables(self) -> None:
         event = SecurityEvent(
-            timestamp=datetime(2026, 8, 28, 12, 0, 0, tzinfo=timezone.utc),
+            timestamp=datetime(2026, 8, 28, 12, 0, 0, tzinfo=UTC),
             source="csv:test.csv",
             raw_data={"test": 123},
         )

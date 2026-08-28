@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import ipaddress
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any
 
 # Standard protocol number to name mapping (IANA)
@@ -52,8 +52,8 @@ def normalize_timestamp(val: Any) -> datetime | None:
 
     if isinstance(val, datetime):
         if val.tzinfo is None:
-            return val.replace(tzinfo=timezone.utc)
-        return val.astimezone(timezone.utc)
+            return val.replace(tzinfo=UTC)
+        return val.astimezone(UTC)
 
     # Numeric UNIX timestamp
     if isinstance(val, (int, float)):
@@ -62,7 +62,7 @@ def normalize_timestamp(val: Any) -> datetime | None:
             val = val / 1e6
         elif val > 1e11:  # milliseconds
             val = val / 1e3
-        return datetime.fromtimestamp(val, tz=timezone.utc)
+        return datetime.fromtimestamp(val, tz=UTC)
 
     val_str = str(val).strip()
     if is_null_value(val_str):
@@ -76,7 +76,7 @@ def normalize_timestamp(val: Any) -> datetime | None:
                 num_val /= 1e6
             elif num_val > 1e11:
                 num_val /= 1e3
-            return datetime.fromtimestamp(num_val, tz=timezone.utc)
+            return datetime.fromtimestamp(num_val, tz=UTC)
         except (ValueError, OverflowError):
             pass
 
@@ -86,8 +86,8 @@ def normalize_timestamp(val: Any) -> datetime | None:
         iso_str = val_str.replace("Z", "+00:00") if val_str.endswith("Z") else val_str
         dt = datetime.fromisoformat(iso_str)
         if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        return dt.astimezone(timezone.utc)
+            dt = dt.replace(tzinfo=UTC)
+        return dt.astimezone(UTC)
     except ValueError:
         pass
 
@@ -96,8 +96,8 @@ def normalize_timestamp(val: Any) -> datetime | None:
         try:
             dt = datetime.strptime(val_str, fmt)
             if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
-            return dt.astimezone(timezone.utc)
+                dt = dt.replace(tzinfo=UTC)
+            return dt.astimezone(UTC)
         except ValueError:
             continue
 

@@ -54,4 +54,4 @@ def configure_logging(config: AppConfig) -> None:
 
 def get_logger(name: str = __name__) -> structlog.BoundLogger:
     """Return a bound structlog logger for name."""
-    return structlog.get_logger(name)
+    return structlog.get_logger(name)  # type: ignore[no-any-return]

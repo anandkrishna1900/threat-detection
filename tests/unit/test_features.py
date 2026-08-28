@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 
 from src.features import (
     EntityStateTracker,
@@ -17,7 +17,7 @@ from src.ingestion.models import SecurityEvent
 class TestFeatureExtractors:
     def test_extract_temporal_features(self) -> None:
         # Wednesday 14:30 UTC
-        dt = datetime(2026, 8, 26, 14, 30, 0, tzinfo=timezone.utc)
+        dt = datetime(2026, 8, 26, 14, 30, 0, tzinfo=UTC)
         res = extract_temporal_features(dt)
         assert res["hour_of_day"] == 14
         assert res["day_of_week"] == 2  # Wednesday
@@ -25,7 +25,7 @@ class TestFeatureExtractors:
         assert res["is_off_hours"] is False
 
         # Sunday 22:00 UTC (weekend + off hours)
-        dt_weekend = datetime(2026, 8, 30, 22, 0, 0, tzinfo=timezone.utc)
+        dt_weekend = datetime(2026, 8, 30, 22, 0, 0, tzinfo=UTC)
         res_w = extract_temporal_features(dt_weekend)
         assert res_w["hour_of_day"] == 22
         assert res_w["day_of_week"] == 6
@@ -34,7 +34,7 @@ class TestFeatureExtractors:
 
     def test_extract_flow_features(self) -> None:
         event = SecurityEvent(
-            timestamp=datetime(2026, 8, 28, 12, 0, 0, tzinfo=timezone.utc),
+            timestamp=datetime(2026, 8, 28, 12, 0, 0, tzinfo=UTC),
             bytes_sent=1000,
             bytes_received=4000,
             duration=2.0,
@@ -48,7 +48,7 @@ class TestFeatureExtractors:
 
     def test_extract_flow_zero_duration(self) -> None:
         event = SecurityEvent(
-            timestamp=datetime(2026, 8, 28, 12, 0, 0, tzinfo=timezone.utc),
+            timestamp=datetime(2026, 8, 28, 12, 0, 0, tzinfo=UTC),
             bytes_sent=500,
             bytes_received=0,
             duration=0.0,
@@ -65,7 +65,7 @@ class TestEntityStateTracker:
 
         # Event 1 at t=0
         e1 = SecurityEvent(
-            timestamp=datetime(2026, 8, 28, 12, 0, 0, tzinfo=timezone.utc),
+            timestamp=datetime(2026, 8, 28, 12, 0, 0, tzinfo=UTC),
             source_ip="192.168.1.50",
             destination_ip="10.0.0.1",
             destination_port=80,
@@ -80,7 +80,7 @@ class TestEntityStateTracker:
 
         # Event 2 at t=10s, different port & IP
         e2 = SecurityEvent(
-            timestamp=datetime(2026, 8, 28, 12, 0, 10, tzinfo=timezone.utc),
+            timestamp=datetime(2026, 8, 28, 12, 0, 10, tzinfo=UTC),
             source_ip="192.168.1.50",
             destination_ip="10.0.0.2",
             destination_port=443,
@@ -98,7 +98,7 @@ class TestEntityStateTracker:
         # Send 6 rapid failed auth events
         for i in range(6):
             e = SecurityEvent(
-                timestamp=datetime(2026, 8, 28, 12, 0, i * 2, tzinfo=timezone.utc),
+                timestamp=datetime(2026, 8, 28, 12, 0, i * 2, tzinfo=UTC),
                 source_ip="10.10.10.10",
                 username=f"user_{i}",
                 event_type="authentication",
@@ -119,7 +119,7 @@ class TestFeaturePipeline:
     def test_pipeline_process_event(self) -> None:
         pipeline = FeaturePipeline()
         event = SecurityEvent(
-            timestamp=datetime(2026, 8, 28, 12, 0, 0, tzinfo=timezone.utc),
+            timestamp=datetime(2026, 8, 28, 12, 0, 0, tzinfo=UTC),
             source_ip="192.168.1.1",
             destination_ip="10.0.0.1",
             destination_port=80,
@@ -148,14 +148,14 @@ class TestFeaturePipeline:
         pipeline = FeaturePipeline()
         events = [
             SecurityEvent(
-                timestamp=datetime(2026, 8, 28, 12, 0, 0, tzinfo=timezone.utc),
+                timestamp=datetime(2026, 8, 28, 12, 0, 0, tzinfo=UTC),
                 source_ip="192.168.1.1",
                 bytes_sent=100,
                 source="test",
                 raw_data={},
             ),
             SecurityEvent(
-                timestamp=datetime(2026, 8, 28, 12, 0, 5, tzinfo=timezone.utc),
+                timestamp=datetime(2026, 8, 28, 12, 0, 5, tzinfo=UTC),
                 source_ip="192.168.1.1",
                 bytes_sent=200,
                 source="test",

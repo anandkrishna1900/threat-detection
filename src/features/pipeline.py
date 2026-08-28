@@ -66,7 +66,7 @@ class FeaturePipeline:
         rows: list[dict[str, Any]] = []
         for event in events:
             fv = self.process_event(event)
-            row = fv.to_numeric_dict()
+            row: dict[str, Any] = fv.to_numeric_dict()  # type: ignore[assignment]
             row["event_id"] = fv.event_id
             row["entity_id"] = fv.entity_id
             rows.append(row)

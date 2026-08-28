@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 
 from src.normalization import (
     EventNormalizer,
@@ -18,28 +18,28 @@ from src.normalization import (
 class TestParsers:
     def test_normalize_timestamp_iso(self) -> None:
         dt = normalize_timestamp("2026-08-28T12:00:00Z")
-        assert dt == datetime(2026, 8, 28, 12, 0, 0, tzinfo=timezone.utc)
+        assert dt == datetime(2026, 8, 28, 12, 0, 0, tzinfo=UTC)
 
         dt_offset = normalize_timestamp("2026-08-28T14:00:00+02:00")
-        assert dt_offset == datetime(2026, 8, 28, 12, 0, 0, tzinfo=timezone.utc)
+        assert dt_offset == datetime(2026, 8, 28, 12, 0, 0, tzinfo=UTC)
 
     def test_normalize_timestamp_epoch(self) -> None:
         # Seconds
         dt = normalize_timestamp(1787918400)
         assert dt is not None
-        assert dt.tzinfo == timezone.utc
+        assert dt.tzinfo == UTC
 
         # Milliseconds
         dt_ms = normalize_timestamp(1787918400000)
         assert dt_ms is not None
-        assert dt_ms.tzinfo == timezone.utc
+        assert dt_ms.tzinfo == UTC
 
     def test_normalize_timestamp_formats(self) -> None:
         dt = normalize_timestamp("2026-08-28 12:00:00")
-        assert dt == datetime(2026, 8, 28, 12, 0, 0, tzinfo=timezone.utc)
+        assert dt == datetime(2026, 8, 28, 12, 0, 0, tzinfo=UTC)
 
         dt_euro = normalize_timestamp("28/08/2026 12:00:00")
-        assert dt_euro == datetime(2026, 8, 28, 12, 0, 0, tzinfo=timezone.utc)
+        assert dt_euro == datetime(2026, 8, 28, 12, 0, 0, tzinfo=UTC)
 
     def test_normalize_timestamp_nulls(self) -> None:
         assert normalize_timestamp(None) is None

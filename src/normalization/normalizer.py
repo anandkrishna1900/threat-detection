@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any
 
 from src.common.logging_setup import get_logger
@@ -68,7 +68,7 @@ class EventNormalizer:
 
         metadata: dict[str, Any] = {}
         if parsed_ts is None:
-            parsed_ts = datetime.now(timezone.utc)
+            parsed_ts = datetime.now(UTC)
             metadata["timestamp_generated"] = True
             if raw_ts is not None:
                 metadata["raw_timestamp_unparsed"] = str(raw_ts)
