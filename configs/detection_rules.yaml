@@ -1,163 +1,134 @@
-# Detection rules configuration
-version: "1.0"
-
+# Detection Rules Configuration
+# Hybrid Cybersecurity Threat Detection Platform
 
 rules:
-  - id: BRUTE_FORCE_001
+  - id: RULE_AUTH_001
     name: Excessive Failed Logins
-    description: >
-      Detects a high number of failed authentication events from the same
-      source IP within a short time window — a common brute-force pattern.
+    description: Detects multiple failed authentication attempts from a single source within a short window (brute force pattern).
     severity: HIGH
-    enabled: false
-    threshold: 10
-    window_sec: 60
+    enabled: true
+    mitre_tactic: Credential Access
+    mitre_technique: T1110.001
     conditions:
-      event_type: authentication
-      action: failed
-      group_by: source_ip
-      count_gte: 10
-    mitre: [T1110]
+      auth_failed_count: 5
+      window_seconds: 60
+    confidence: 0.85
 
-  - id: BRUTE_FORCE_002
-    name: Multi-Account Credential Attack
-    description: >
-      Detects failed logins targeting multiple distinct usernames from the
-      same source — indicative of credential stuffing or password spray.
+  - id: RULE_AUTH_002
+    name: Password Spraying Across Multiple Accounts
+    description: Detects authentication attempts targeting multiple distinct usernames from a single source within 5 minutes.
     severity: HIGH
-    enabled: false
-    threshold: 5
-    window_sec: 120
+    enabled: true
+    mitre_tactic: Credential Access
+    mitre_technique: T1110.003
     conditions:
-      event_type: authentication
-      action: failed
-      group_by: source_ip
-      distinct_field: username
-      distinct_gte: 5
-    mitre: [T1110.003]
+      unique_users_targeted: 3
+      auth_failed_count: 3
+      window_seconds: 300
+    confidence: 0.90
 
-  - id: BRUTE_FORCE_003
-    name: Success After Repeated Failures
-    description: >
-      Detects a successful authentication from a source IP that generated
-      multiple recent failures — may indicate a successful brute force.
+  - id: RULE_AUTH_003
+    name: Successful Login After Multiple Failures
+    description: Detects a successful authentication event following a burst of failed attempts from the same source.
     severity: CRITICAL
-    enabled: false
-    threshold: 5
-    window_sec: 300
+    enabled: true
+    mitre_tactic: Credential Access
+    mitre_technique: T1110
     conditions:
-      event_type: authentication
-      sequence:
-        - action: failed
-          count_gte: 5
-        - action: success
-    mitre: [T1110, T1078]
+      is_success: true
+      prior_failures_threshold: 3
+      window_seconds: 300
+    confidence: 0.95
 
-  - id: RECON_001
-    name: Port Scan Behavior
-    description: >
-      Detects connection attempts to an unusually high number of distinct
-      destination ports from a single source — typical of port scanning.
+  - id: RULE_NET_001
+    name: Port Scan Activity
+    description: Detects single source connecting to an unusually high number of unique destination ports within 5 minutes.
     severity: MEDIUM
-    enabled: false
-    threshold: 20
-    window_sec: 60
+    enabled: true
+    mitre_tactic: Discovery
+    mitre_technique: T1046
     conditions:
-      event_type: network
-      group_by: source_ip
-      distinct_field: destination_port
-      distinct_gte: 20
-    mitre: [T1046]
+      unique_dst_ports: 10
+      window_seconds: 300
+    confidence: 0.80
 
-  - id: RECON_002
+  - id: RULE_NET_002
     name: Excessive Connection Attempts
-    description: >
-      Detects a high volume of outbound connection events from a single
-      source, regardless of port diversity.
+    description: Detects a burst of network connection attempts exceeding normal thresholds.
     severity: MEDIUM
-    enabled: false
-    threshold: 100
-    window_sec: 60
+    enabled: true
+    mitre_tactic: Impact
+    mitre_technique: T1498
     conditions:
-      event_type: network
-      group_by: source_ip
-      count_gte: 100
-    mitre: [T1046, T1595]
+      conns_1m: 50
+    confidence: 0.75
 
-  - id: EXFIL_001
+  - id: RULE_NET_003
     name: Abnormal Outbound Data Volume
-    description: >
-      Detects unusually large outbound byte transfer from a single source —
-      a potential exfiltration signal.
+    description: Detects large outbound data transmission exceeding the volume threshold (data exfiltration indicator).
     severity: HIGH
-    enabled: false
-    threshold: 104857600  # 100 MB
-    window_sec: 300
+    enabled: true
+    mitre_tactic: Exfiltration
+    mitre_technique: T1048
     conditions:
-      event_type: network
-      group_by: source_ip
-      sum_field: bytes_sent
-      sum_gte: 104857600
-    mitre: [T1041, T1048]
+      bytes_sent_threshold: 10000000.0  # 10 MB
+    confidence: 0.85
 
-  - id: ADMIN_001
+  - id: RULE_HOST_001
     name: Unusual Administrative Activity
-    description: >
-      Detects privileged or administrative events outside normal operating
-      hours or from unusual source entities.
+    description: Detects administrative actions or privileged account usage during off-hours.
     severity: MEDIUM
-    enabled: false
-    threshold: 1
-    window_sec: 3600
+    enabled: true
+    mitre_tactic: Privilege Escalation
+    mitre_technique: T1078
     conditions:
-      event_type: administrative
-      outside_hours: true
-    mitre: [T1078.002]
+      is_off_hours: true
+      admin_usernames:
+        - root
+        - administrator
+        - admin
+        - system
+    confidence: 0.70
 
-  - id: BURST_001
+  - id: RULE_EVENT_001
     name: Suspicious Event Burst
-    description: >
-      Detects an abnormal burst of any event type from a single entity
-      within a very short window.
-    severity: MEDIUM
-    enabled: false
-    threshold: 50
-    window_sec: 30
-    conditions:
-      group_by: source_ip
-      count_gte: 50
-    mitre: []
-
-  - id: LATERAL_001
-    name: Multiple Authentication Failures Across Hosts
-    description: >
-      Detects authentication failures from a single source targeting
-      multiple distinct destination hosts — may indicate lateral movement
-      reconnaissance.
-    severity: HIGH
-    enabled: false
-    threshold: 3
-    window_sec: 300
-    conditions:
-      event_type: authentication
-      action: failed
-      group_by: source_ip
-      distinct_field: hostname
-      distinct_gte: 3
-    mitre: [T1021, T1110]
-
-  - id: ACCESS_001
-    name: Repeated Access to Unusual Services
-    description: >
-      Detects repeated access attempts to services on non-standard ports
-      that are uncommon in the baseline for this source.
+    description: Detects an abnormal volume of events generated by a single entity within 1 minute.
     severity: LOW
-    enabled: false
-    threshold: 5
-    window_sec: 300
+    enabled: true
+    mitre_tactic: Discovery
+    mitre_technique: T1498
     conditions:
-      event_type: network
-      group_by: source_ip
-      unusual_port: true
-      count_gte: 5
-    mitre: [T1071]
+      events_1m: 100
+    confidence: 0.65
+
+  - id: RULE_AUTH_004
+    name: Multi-Host Authentication Failures
+    description: Detects failed authentication events from a single source targeting multiple distinct destination IPs.
+    severity: HIGH
+    enabled: true
+    mitre_tactic: Lateral Movement
+    mitre_technique: T1021
+    conditions:
+      unique_dst_ips: 3
+      auth_failed_count: 3
+      window_seconds: 300
+    confidence: 0.85
+
+  - id: RULE_NET_004
+    name: Sensitive Service Access
+    description: Detects network traffic targeting high-risk management and database ports.
+    severity: MEDIUM
+    enabled: true
+    mitre_tactic: Initial Access
+    mitre_technique: T1190
+    conditions:
+      sensitive_ports:
+        - 22    # SSH
+        - 23    # Telnet
+        - 3389  # RDP
+        - 445   # SMB
+        - 1433  # MSSQL
+        - 3306  # MySQL
+        - 5432  # PostgreSQL
+        - 27017 # MongoDB
+    confidence: 0.70

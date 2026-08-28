@@ -47,7 +47,7 @@ def _cmd_status(args: argparse.Namespace) -> None:  # noqa: ARG001
     print("    Phase 1: Ingestion      : READY (CSV, JSON, JSONL, Synthetic)")
     print("    Phase 2: Normalization  : READY (Parsers, Profiles, Canonical Schema)")
     print("    Phase 3: Features       : READY (Sliding Windows, Temporal, Flow)")
-    print("    Phase 4: Rules engine   : NOT YET IMPLEMENTED")
+    print("    Phase 4: Rules engine   : READY (YAML Rules, Evaluators, MITRE Mapping)")
     print("    Phase 5: Baselines      : NOT YET IMPLEMENTED")
     print("    Phase 6: ML engine      : NOT YET IMPLEMENTED")
     print("    Phase 7: Hybrid score   : NOT YET IMPLEMENTED")

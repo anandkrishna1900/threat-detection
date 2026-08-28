@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
-from datetime import datetime, timezone, UTC
+from datetime import datetime, UTC
 from typing import Any
 
 from src.common.logging_setup import get_logger

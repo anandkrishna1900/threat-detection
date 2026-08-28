@@ -73,6 +73,7 @@ class FeaturePipeline:
 
         try:
             import pandas as pd
+
             return pd.DataFrame(rows)
         except Exception:
             return rows
