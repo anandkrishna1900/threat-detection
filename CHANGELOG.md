@@ -11,7 +11,15 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [0.3.0] — 2026-08-28 — Phase 2: Event Normalization
+## [0.4.0] — 2026-08-28 — Phase 3: Feature Engineering
+
+### Added
+- `src/features/models.py` — `FeatureVector` schema with pure numerical/boolean cybersecurity features and dictionary/vector transformation methods (strictly leak-free).
+- `src/features/state.py` — `EntityStateTracker` providing sliding-window (1m/5m/15m) behavioral state tracking per IP/user/host, unique destination diversity, and authentication failure burst monitoring.
+- `src/features/extractors.py` — Temporal feature extractors (`hour_of_day`, `day_of_week`, `is_weekend`, `is_off_hours`) and flow metrics (`bytes_per_sec`, `bytes_ratio`, `bytes_total`).
+- `src/features/pipeline.py` — `FeaturePipeline` orchestrating event-level and stream-level feature engineering and batch tabular dataset generation.
+- `tests/unit/test_features.py` — 7 unit tests verifying temporal/flow extractors, sliding window metrics, burst flag triggers, and pipeline exports.
+
 
 ### Added
 - `src/normalization/parsers.py` — Value parsers for timestamps (ISO 8601, UNIX epoch sec/msec/microsec, custom datetime formats to UTC), IP validation and port cleanup, port bounds validation (0-65535), protocol code/name mapping (IANA protocols), and numeric/string normalization.
