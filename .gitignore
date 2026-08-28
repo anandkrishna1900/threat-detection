@@ -1,0 +1,74 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# --- Distribution / packaging ---
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# --- Testing ---
+.pytest_cache/
+.coverage
+htmlcov/
+*.coveragerc
+coverage.xml
+
+# --- Type checking ---
+.mypy_cache/
+.dmypy.json
+
+# --- Linting ---
+.ruff_cache/
+
+# --- IDE ---
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Data (raw / sensitive — never commit real logs or credentials) ---
+data/raw/
+data/processed/
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# --- Trained models ---
+models/*.pkl
+models/*.joblib
+models/*.pt
+models/*.h5
+!models/.gitkeep
+
+# --- Notebooks ---
+notebooks/.ipynb_checkpoints/
+
+# --- Reports ---
+reports/figures/*.png
+reports/figures/*.svg
+reports/evaluation/*.json
+!reports/figures/.gitkeep
+!reports/evaluation/.gitkeep
+
+# --- Secrets ---
+*.env
+!.env.example
+secrets/

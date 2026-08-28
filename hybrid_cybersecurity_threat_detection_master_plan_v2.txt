@@ -1,0 +1,1019 @@
+HYBRID CYBERSECURITY THREAT DETECTION PLATFORM — MASTER PROJECT SPEC
+Specification for Claude
+Version: 2.0
+Date: August 2026
+
+============================================================
+1. PROJECT VISION
+============================================================
+
+Build a serious, GitHub-ready cybersecurity threat detection platform
+that ingests security/network events, normalizes them, detects
+suspicious behavior using multiple complementary detection methods,
+correlates related events into incidents, assigns explainable risk
+scores, identifies likely attack techniques, and presents results
+through an API and dashboard.
+
+The project must NOT be a "train an ML model and classify attacks"
+script. The target is a miniature, defensible SOC (Security
+Operations Center) platform with:
+
+- Rule-based detection
+- Statistical anomaly detection (behavioral baselines)
+- Machine-learning anomaly detection
+- Event correlation
+- Risk scoring (transparent, component-based)
+- Threat classification
+- Attack-chain / multi-stage incident detection
+- MITRE ATT&CK technique mapping
+- Explainable alerts (evidence before inference)
+- Investigation timelines
+- REST API
+- Dashboard
+- Automated testing
+- Benchmarking / evaluation
+- Reproducible experiments
+- Strong documentation
+
+ETHICAL / LEGAL BOUNDARY (non-negotiable):
+All testing must use public datasets, synthetic data, local lab
+environments, or systems the developer owns or has explicit written
+permission to test. Do NOT perform unauthorized scanning,
+exploitation, credential attacks, or traffic generation against real
+systems, and do not upload real victim data, real credentials, or
+sensitive logs to the repository.
+
+============================================================
+2. PRIMARY OBJECTIVES
+============================================================
+
+The finished system should be able to answer, for any alert:
+
+ 1. What happened?
+ 2. Is it suspicious?
+ 3. How suspicious is it (score)?
+ 4. Why was it considered suspicious (evidence)?
+ 5. What asset/user/IP is involved?
+ 6. What attack type or ATT&CK technique may be involved?
+ 7. Are multiple events part of the same incident?
+ 8. What is the likely progression of the incident?
+ 9. What evidence supports the alert?
+10. How confident is the system?
+11. How well does the detector actually perform (measured, not assumed)?
+12. What false positives does it produce, and why?
+
+============================================================
+3. REALISM CHECK — READ THIS BEFORE STARTING
+============================================================
+
+This is a large spec (17 phases + advanced features). As a solo
+project, a fully-tested, well-documented Phase 0–7 (foundation,
+ingestion, normalization, features, rules, baselines, ML, hybrid
+scoring) is a STRONGER portfolio artifact than a rushed, buggy
+Phase 0–17.
+
+Two committed checkpoints, not just an MVP/advanced split:
+
+- CORE (must finish): Phases 0–8 — foundation through explainable
+  alerts. This alone is a complete, defensible, demoable project.
+- EXTENDED (stretch): Phases 9–15 — correlation, attack chains,
+  ATT&CK mapping, risk engine refinement, DB, API, dashboard.
+- ADVANCED (optional, time-permitting): synthetic scenario library,
+  streaming mode, Docker/CI, ablation studies.
+
+Do not start EXTENDED work until CORE is fully tested and documented.
+Do not start ADVANCED work until EXTENDED is stable.
+
+Phases 9-10 (correlation and attack-chain detection) are the hardest
+part of this project — harder than the ML component. Budget
+disproportionate time and expect to iterate on correlation-window
+tuning against your own synthetic multi-stage scenarios rather than
+getting it right the first time.
+
+============================================================
+4. HIGH-LEVEL ARCHITECTURE
+============================================================
+
+                    DATA SOURCES
+                         |
+        +----------------+----------------+
+        |                |                |
+      CSV/JSON          Logs           PCAP-derived
+        |                |                |
+        +----------------+----------------+
+                         |
+                         v
+                 INGESTION LAYER
+                         |
+                         v
+                EVENT NORMALIZATION
+                         |
+                         v
+                 FEATURE EXTRACTION
+                         |
+          +--------------+--------------+
+          |              |              |
+          v              v              v
+       RULES        ML ANOMALY      BEHAVIOR
+       ENGINE         ENGINE         ENGINE
+          |              |              |
+          +--------------+--------------+
+                         |
+                         v
+                  CORRELATION ENGINE
+                         |
+                         v
+                    RISK ENGINE
+                         |
+                         v
+               THREAT CLASSIFICATION
+                         |
+                         v
+               ATT&CK TECHNIQUE MAP
+                         |
+                         v
+                  INCIDENT ENGINE
+                         |
+               +---------+---------+
+               |                   |
+               v                   v
+             REST API          DATABASE
+               |                   |
+               +---------+---------+
+                         |
+                         v
+                     DASHBOARD
+
+============================================================
+5. RECOMMENDED TECHNOLOGY STACK
+============================================================
+
+Core language:
+- Python 3.11+
+
+Backend:
+- FastAPI, Pydantic, Uvicorn
+
+Data:
+- pandas, NumPy, scikit-learn
+- Polars optional later for performance
+
+Machine learning:
+- Isolation Forest (initial, unsupervised)
+- One-Class SVM (optional comparison)
+- Random Forest / XGBoost (supervised experiments only, clearly
+  labeled as such — do not blend supervised results into the
+  "unsupervised anomaly detection" narrative)
+- Autoencoder (optional, advanced phase only)
+
+Storage:
+- SQLite for development
+- PostgreSQL as an optional production-style upgrade
+- SQLAlchemy ORM
+
+Caching / queues:
+- Not required initially; Redis only if streaming mode is attempted
+
+Dashboard:
+- Streamlit for fastest development, OR
+- React + FastAPI for a more advanced frontend
+(Pick one at Phase 0 and commit — do not build both.)
+
+Visualization:
+- Plotly
+
+Testing:
+- pytest, pytest-cov
+
+Code quality:
+- Ruff, Black, mypy (optional but recommended given type hints
+  requirement below)
+
+Configuration:
+- .env for secrets/environment
+- YAML/JSON for detection rules, model config, risk weights
+
+Packaging:
+- pyproject.toml (preferred) or requirements.txt
+- Docker/Docker Compose in advanced phase only
+
+Documentation:
+- Markdown, architecture diagrams, FastAPI/OpenAPI auto-docs
+
+============================================================
+6. REPOSITORY STRUCTURE
+============================================================
+
+threat-detection-platform/
+├── README.md
+├── LICENSE
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── CHANGELOG.md
+├── .gitignore
+├── .env.example
+├── pyproject.toml
+├── requirements.txt
+├── docker-compose.yml
+├── main.py
+│
+├── configs/
+│   ├── detection_rules.yaml
+│   ├── model_config.yaml
+│   └── risk_config.yaml
+│
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   ├── synthetic/
+│   └── README.md
+│
+├── notebooks/
+│   ├── 01_data_exploration.ipynb
+│   ├── 02_feature_analysis.ipynb
+│   ├── 03_anomaly_detection.ipynb
+│   └── 04_model_evaluation.ipynb
+│
+├── src/
+│   ├── ingestion/
+│   ├── normalization/
+│   ├── features/
+│   ├── detection/
+│   │   ├── rules/
+│   │   ├── ml/
+│   │   └── behavioral/
+│   ├── correlation/
+│   ├── scoring/
+│   ├── classification/
+│   ├── attack_mapping/
+│   ├── incidents/
+│   ├── storage/
+│   ├── api/
+│   ├── dashboard/
+│   └── common/
+│
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── evaluation/
+│
+├── scripts/
+│   ├── ingest_dataset.py
+│   ├── generate_synthetic_data.py
+│   ├── train_model.py
+│   ├── evaluate_model.py
+│   └── run_detector.py
+│
+├── docs/
+│   ├── architecture.md
+│   ├── detection-methodology.md
+│   ├── threat-model.md
+│   ├── evaluation.md
+│   ├── api.md
+│   └── attack-scenarios.md
+│
+├── models/
+│   └── .gitkeep
+│
+└── reports/
+    ├── figures/
+    └── evaluation/
+
+============================================================
+7. DEVELOPMENT PRINCIPLE
+============================================================
+
+Do not build the entire system at once. Build vertically, in phases.
+
+Every phase must:
+- run
+- be testable
+- have documentation
+- have sample input/output
+- have automated tests where appropriate
+- produce measurable progress
+
+Do not add complexity to a layer before the layer beneath it is
+stable and tested.
+
+============================================================
+8. PHASE 0 — PROJECT FOUNDATION
+============================================================
+
+Goals:
+- Create repository and directory structure
+- Set up virtual environment and dependencies
+- Establish coding standards
+- Create configuration system
+- Create structured logging
+- Create basic test framework and CLI entry point
+
+Tasks:
+ 1. Initialize Git repository
+ 2. Create directory structure (Section 6)
+ 3. Create pyproject.toml
+ 4. Add Ruff/Black configuration
+ 5. Add pytest configuration
+ 6. Create application configuration loader (env + YAML)
+ 7. Create structured logging (JSON-capable, leveled)
+ 8. Create basic CLI entry point
+ 9. Create README (project description, quick start, status)
+10. Add .env.example
+11. Create initial CI workflow (GitHub Actions: lint + test)
+
+Deliverable: a clean repository where tests execute, the app starts,
+configuration loads, and logging works — nothing else yet.
+
+============================================================
+9. PHASE 1 — DATA INGESTION
+============================================================
+
+Goal: a flexible ingestion layer supporting CSV, JSON, and JSON Lines.
+
+Interface shape:
+  DataSource -> CSVSource -> JSONSource -> SyntheticSource
+
+The ingestion layer must NOT contain detection logic — it only reads
+and yields raw records.
+
+Each record eventually becomes a normalized SecurityEvent:
+
+SecurityEvent:
+- event_id, timestamp, source_ip, destination_ip, source_port,
+  destination_port, protocol, bytes_sent, bytes_received, duration,
+  username, hostname, event_type, action, status, raw_data, source,
+  metadata
+
+Not every event has every field — use nullable fields and always
+preserve raw_data for later investigation.
+
+Deliverables: ingestion modules, a small sample dataset, ingestion
+tests, input validation, and explicit error handling for malformed
+records (skip-and-log, never silently drop without a count).
+
+============================================================
+10. PHASE 2 — EVENT NORMALIZATION
+============================================================
+
+Different datasets use different field names. Build a canonical
+schema and a mapping layer.
+
+Example mappings:
+  src_ip / source_address / "Source IP"      -> source_ip
+  dst_ip / destination_address / "Dest IP"    -> destination_ip
+  src_port / source_port                      -> source_port
+  dst_port / destination_port                 -> destination_port
+
+Normalize:
+- timestamps to UTC
+- IP representations
+- ports and protocols
+- event types and categorical values
+- missing values (explicit null, not empty string or 0)
+
+Preserve both the original event and the normalized event.
+
+Requirements: deterministic, validated, well tested.
+
+Deliverable: a normalized event stream independent of source format.
+
+============================================================
+11. PHASE 3 — FEATURE ENGINEERING
+============================================================
+
+Do NOT feed raw records into the ML model. Build meaningful
+cybersecurity-specific features.
+
+Network features:
+- packet count, bytes sent/received, duration, packets/sec, bytes/sec
+- unique destination ports, unique destination IPs
+- connection frequency, failed-connection ratio, protocol frequency
+
+Authentication features:
+- failed login count, successful login count, failure/success ratio
+- unique usernames targeted, unique source IPs
+- login frequency, time since previous login
+- unusual login time, repeated-failure burst detection
+
+Host behavior:
+- event frequency, process frequency
+- unusual executable count, repeated privilege-related events
+
+Temporal features:
+- hour, day of week
+- rolling 1/5/15-minute counts, exponentially weighted activity
+
+Entity behavior baselines:
+- per-IP, per-user, per-host baselines (feeds Phase 5)
+
+Data leakage discipline:
+- Never use target/attack labels as input features
+- Be explicit about which features are only meaningful in the
+  benchmark dataset's collection context (e.g. some CIC-IDS2017 /
+  UNSW-NB15 flow-derived fields can leak label information — see
+  Phase 16 caveats). Document any feature you suspect of this.
+
+============================================================
+12. PHASE 4 — RULE-BASED DETECTION ENGINE
+============================================================
+
+Build the rule engine before ML.
+
+Each rule has:
+- rule_id, name, description, severity
+- conditions, threshold, window
+- MITRE mapping
+- enabled/disabled state
+- evidence generation
+
+Example conceptual rule (BRUTE_FORCE_001):
+  Condition: failed authentication events from same source >=
+             threshold within time window
+  Output: triggered (bool), severity, evidence, entities,
+          confidence, rule_id
+
+Initial defensive rule set:
+ 1. Excessive failed logins
+ 2. Repeated failed logins against multiple accounts
+ 3. Successful login after abnormal failures
+ 4. Port-scan-like behavior
+ 5. Excessive connection attempts
+ 6. Abnormal outbound data volume
+ 7. Unusual administrative activity
+ 8. Suspicious event burst
+ 9. Multiple authentication failures across hosts
+10. Repeated access to unusual services
+
+Rules must be configurable (YAML) rather than hardcoded wherever
+practical, so thresholds can be tuned without code changes.
+
+============================================================
+13. PHASE 5 — BEHAVIORAL BASELINES
+============================================================
+
+Build a baseline of normal behavior per entity (source IP, username,
+host, service):
+
+- average requests/minute, standard deviation
+- normal login hours, typical destinations
+- normal data volume, normal port count, normal event frequency
+
+Simple anomaly score:  z = (x - mean) / standard_deviation
+
+Guard against zero or near-zero standard deviation (use a floor
+value or fall back to a percentile-based method for low-variance
+entities).
+
+Do not assume every statistical anomaly is malicious — baselines
+surface deviation, not intent.
+
+Output shape:
+
+BehaviorAnomaly:
+- entity, feature, observed_value, expected_value, deviation,
+  anomaly_score, explanation
+
+This is a core explainability input for Phase 8.
+
+============================================================
+14. PHASE 6 — MACHINE LEARNING ANOMALY DETECTION
+============================================================
+
+Initial algorithm: Isolation Forest.
+
+Why: unsupervised, practical for anomaly detection, handles multiple
+features, does not require labels for initial training.
+
+Workflow:
+ 1. Load clean baseline data
+ 2. Normalize features
+ 3. Handle missing values
+ 4. Encode categorical variables appropriately
+ 5. Scale features where required
+ 6. Train Isolation Forest
+ 7. Save model artifact
+ 8. Generate anomaly scores
+ 9. Calibrate threshold using a validation split
+10. Evaluate against labeled test data (held out, never trained on)
+
+Model artifacts must contain: model, feature list, preprocessing
+pipeline, training metadata, dataset version, model version,
+threshold.
+
+Output shape:
+
+MLResult:
+- anomaly_score, predicted_anomaly, model_version, features_used
+
+An anomaly score is not itself proof of malicious activity — say so
+in both code comments and dashboard copy.
+
+============================================================
+15. PHASE 7 — HYBRID DETECTION (RISK COMBINATION)
+============================================================
+
+Combine Rule Score + Behavior Score + ML Score into a single risk
+score. Do not blindly average — weight and document the weighting.
+
+Example conceptual formula:
+
+  risk = weighted_rule_score + weighted_behavior_score
+       + weighted_ml_score + correlation_bonus
+
+Clamp to 0–100.
+
+Example:
+  Rule evidence:      35
+  Behavior anomaly:   22
+  ML anomaly:         18
+  Correlation bonus:  15
+  ------------------------
+  Risk score:         90
+
+Risk levels: 0–24 LOW, 25–49 MEDIUM, 50–74 HIGH, 75–100 CRITICAL
+
+These thresholds and weights must be configurable (risk_config.yaml)
+and validated empirically against your evaluation set, not chosen
+arbitrarily and left unexamined.
+
+============================================================
+16. PHASE 8 — EXPLAINABLE ALERTS
+============================================================
+
+Every alert must answer WHY, with evidence — not just assert a
+conclusion.
+
+Bad:  "Attack detected."
+
+Good:
+  Threat: Possible credential attack
+  Risk: 87/100        Severity: HIGH
+  Evidence:
+    - 42 failed login attempts in 90 seconds
+    - 5 usernames targeted
+    - activity was 6.8x above baseline
+    - successful authentication occurred after failures
+  Detection sources: BRUTE_FORCE_001, behavioral anomaly, ML anomaly
+  Potential ATT&CK technique: Credential Access / Brute Force
+    (or Valid Accounts, depending on evidence)
+
+The system must clearly distinguish evidence, inference, and
+confidence, and must never present an uncertain classification as
+fact. Use "suspected / possible / likely / observed" language
+consistently in generated text.
+
+--- CORE CHECKPOINT: Phases 0–8 complete = a fully demoable,
+    defensible detection pipeline. Confirm this works end-to-end
+    and is tested before proceeding. ---
+
+============================================================
+17. PHASE 9 — EVENT CORRELATION
+============================================================
+
+One of the hardest and most valuable features. Individual events are
+often weak signals; correlation is what turns them into a coherent
+incident.
+
+Correlate events using: time proximity, source IP, destination host,
+username, process/entity identifiers, related services, shared
+indicators.
+
+Example:
+  Event 1: Port scanning
+  Event 2: Repeated connection attempts
+  Event 3: Authentication failures
+  Event 4: Successful authentication
+  Event 5: Suspicious activity after login
+  -> these become ONE incident.
+
+Build a correlation engine that groups related events into:
+  Incident -> Events -> Alerts -> Entities -> Evidence -> Techniques
+  -> Timeline
+
+Use configurable correlation windows. Expect to iterate: start with
+generous time windows and shared-entity matching, then tighten based
+on false-positive review against your synthetic scenarios (Phase 17
+in the original numbering / see Section 20 below). Log every
+correlation decision with the matching criteria that fired, so you
+can debug over- and under-correlation later.
+
+============================================================
+18. PHASE 10 — ATTACK CHAIN DETECTION
+============================================================
+
+Build higher-level detection on top of correlated incidents. Instead
+of only "port scan detected," identify a plausible progression:
+
+  Reconnaissance -> Initial Access indicator -> Credential attack ->
+  Successful authentication -> Suspicious post-authentication
+  behavior
+
+Do not claim a full attack occurred unless the evidence supports it
+— use "suspected / possible / likely / observed" consistently.
+
+Example incident representation:
+
+  Incident #1042
+  20:01 Reconnaissance indicator
+  20:03 Repeated connection attempts
+  20:04 Authentication failures
+  20:05 Successful login
+  20:07 Abnormal privileged activity
+  Risk: 93/100     Confidence: High
+
+============================================================
+19. PHASE 11 — MITRE ATT&CK MAPPING
+============================================================
+
+Map detections to relevant MITRE ATT&CK techniques and store:
+technique ID, technique name, tactic, evidence, detection rule,
+confidence.
+
+Do NOT auto-assign a technique merely because a dataset's attack
+label sounds similar. Mapping must be traceable to specific
+detection logic (which rule/model/behavior fired), and only
+techniques that can be defensibly supported should be implemented.
+
+Reference tactic categories: Reconnaissance, Initial Access,
+Credential Access, Execution, Persistence, Privilege Escalation,
+Defense Evasion, Discovery, Command and Control, Exfiltration,
+Impact.
+
+Include ATT&CK references (technique IDs, links) in documentation.
+
+============================================================
+20. PHASE 12 — RISK SCORING ENGINE (FORMALIZED)
+============================================================
+
+Build a dedicated, incident-level risk engine (distinct from the
+per-event hybrid score in Phase 7).
+
+Inputs: detection severity, rule confidence, ML anomaly, behavioral
+anomaly, number of correlated events, affected entities, temporal
+concentration, historical activity, attack-chain evidence.
+
+Outputs: score 0–100, severity, confidence, explanation, and stored
+component breakdown:
+
+  {
+    "risk_score": 88,
+    "components": {
+      "rule": 32, "behavior": 21, "ml": 18,
+      "correlation": 12, "impact": 5
+    }
+  }
+
+Do not present the score as more scientifically precise than the
+calibration behind it actually supports — document how it was
+calibrated (or state plainly that it wasn't, if using default
+weights).
+
+============================================================
+21. PHASE 13 — DATABASE
+============================================================
+
+Recommended entities: SecurityEvent, Detection, Alert, Incident,
+Entity, ThreatIndicator, BehaviorBaseline, ModelVersion,
+DetectionRule, AttackTechnique.
+
+Relationships:
+  Incident -> Alerts -> Events -> Entities -> Techniques
+  Detection -> Event(s) -> Rule/Model -> Evidence
+
+Store raw evidence where practical. Index: timestamp, source_ip,
+destination_ip, username, host, severity, incident_id.
+
+============================================================
+22. PHASE 14 — REST API
+============================================================
+
+Build FastAPI endpoints, e.g.:
+
+  GET  /health
+  POST /events
+  POST /detect
+  GET  /alerts            GET /alerts/{id}
+  GET  /incidents         GET /incidents/{id}
+  GET  /events
+  GET  /statistics
+  GET  /detections
+  GET  /models
+  GET  /rules
+  GET  /techniques
+  GET  /entities/{id}
+  POST /analysis/run
+
+Requirements: Pydantic validation, correct HTTP status codes, error
+handling, pagination, filtering, sorting, auto-generated API docs,
+authentication only if actually needed for a deployment scenario.
+
+Example filters: severity, date range, source IP, host, technique,
+incident, detection type.
+
+============================================================
+23. PHASE 15 — DASHBOARD
+============================================================
+
+Build a professional-looking defensive-security dashboard, not a
+generic ML demo UI.
+
+Top cards: total events, active alerts, critical incidents,
+high-risk entities.
+
+Charts: alerts over time, severity distribution, detection-method
+distribution, top suspicious IPs, top affected hosts, attack
+techniques observed, anomaly score distribution.
+
+Incident page: risk score, timeline, entities, evidence, detections,
+ATT&CK techniques, related events.
+
+Alert page: description, severity, confidence, risk components,
+evidence, triggering rules, ML output, behavioral output, related
+alerts.
+
+Do not overload the UI with charts that don't support a decision an
+analyst would actually make.
+
+============================================================
+24. PHASE 16 — DATASETS AND THEIR CAVEATS
+============================================================
+
+Use reputable public datasets. Candidates:
+
+1. CIC-IDS2017 — widely used, but known to have flow-feature
+   artifacts (e.g. certain fields correlate suspiciously well with
+   labels due to how traffic was generated) that can inflate
+   reported metrics if used naively. Read published critiques before
+   reporting results from it.
+2. UNSW-NB15 — similar caveat: synthetic attack generation means
+   some features are near-giveaways for specific attack categories.
+3. NSL-KDD — useful for historical comparison only; considered
+   dated and not representative of modern traffic.
+4. Other public datasets as research progresses.
+
+Selection criteria: clear labels, documented features, legitimate
+public availability, sufficient normal traffic, useful attack
+categories, reproducibility.
+
+Do not rely on a single dataset for headline metrics. Document
+dataset caveats explicitly in docs/evaluation.md, including any
+known feature-leakage concerns and how you mitigated them (e.g.
+dropping suspect features, testing across datasets, holding out
+properly).
+
+Real-world traffic differs significantly from any benchmark dataset
+— say this plainly in the README, not just in a footnote.
+
+============================================================
+25. PHASE 17 — SYNTHETIC DATA GENERATION
+============================================================
+
+Build a synthetic event generator to:
+- create controlled, labeled multi-stage attack scenarios for
+  correlation/attack-chain testing (this is what Phase 9-10 will
+  actually be validated against)
+- fill gaps in public datasets (e.g. specific attack chains not
+  well represented)
+- provide a reproducible, shareable demo dataset that requires no
+  external download
+
+Synthetic scenarios should include: normal baseline traffic, a
+reconnaissance pattern, repeated connection attempts, an
+authentication-failure burst, a successful login, and abnormal
+post-authentication behavior (data volume spike, unusual access
+pattern) — this is the scenario used for the final demo (Section 30).
+
+============================================================
+26. TESTING STRATEGY
+============================================================
+
+- Unit tests: normalization mappings, feature calculations, rule
+  logic, risk-score math, z-score edge cases (zero variance).
+- Integration tests: full pipeline on a small fixture dataset,
+  end-to-end from raw record to stored alert.
+- Evaluation tests: precision/recall/F1/false-positive rate against
+  held-out labeled data, tracked over time so regressions are
+  visible.
+- Regression fixtures: at least one "known incident" synthetic
+  scenario that must always be detected and correctly correlated —
+  treat this as a canary test.
+
+Run the full test suite after every phase, not just at the end.
+
+============================================================
+27. MVP TARGET (reference definition)
+============================================================
+
+Minimum viable, end-to-end demonstrable system:
+- rule engine + one ML model (Isolation Forest) + basic behavioral
+  baseline
+- SQLite storage
+- FastAPI
+- basic dashboard
+- evaluation script
+- a handful of synthetic scenarios
+
+Demonstrates: Dataset -> Detection -> Alert -> Risk score -> Dashboard
+
+============================================================
+28. ADVANCED TARGET (reference definition)
+============================================================
+
+- full hybrid detection, behavioral profiling
+- event correlation, incident creation, attack-chain reasoning
+- ATT&CK mapping, explainability throughout
+- benchmark comparison, false-positive analysis, ablation study
+- streaming mode, Docker, CI, comprehensive tests
+- polished dashboard, fully reproducible evaluation
+
+============================================================
+29. RESUME / PORTFOLIO FRAMING
+============================================================
+
+Do not describe the project as:
+  "Built an AI cybersecurity detector."
+
+Prefer:
+  "Developed a hybrid cybersecurity threat detection platform
+  combining configurable behavioral rules, statistical baselines,
+  unsupervised anomaly detection, event correlation, risk scoring,
+  and ATT&CK-aligned incident analysis."
+
+If measured results are strong, include actual metrics, e.g.:
+  "Evaluated rule-based, behavioral, ML, and hybrid detection
+  approaches across X events, measuring precision, recall, F1,
+  false-positive rate, and detection latency."
+
+Never fabricate metrics. If a metric wasn't measured, don't cite it.
+
+============================================================
+30. GITHUB PRESENTATION
+============================================================
+
+Repository should demonstrate: clean code, meaningful commits,
+clear architecture, reproducibility, tests, experiments,
+screenshots, evaluation results, honestly stated limitations, and a
+responsible-security statement (what was and wasn't tested against
+real systems).
+
+Suggested README opening:
+  "An explainable hybrid cybersecurity threat detection platform
+  that combines deterministic detection, behavioral analytics,
+  unsupervised anomaly detection, and event correlation to identify
+  and prioritize suspicious activity."
+
+Then show, in order: Architecture -> Quick Start -> Example Alert ->
+Dashboard screenshot -> Evaluation results -> Limitations.
+
+============================================================
+31. WHAT NOT TO DO
+============================================================
+
+Do NOT:
+- claim high accuracy without proper, held-out evaluation
+- train on test data
+- hardcode thresholds that should be configurable
+- make an LLM the core detector
+- treat "anomaly" as equivalent to "attack"
+- treat IP reputation alone as proof
+- blindly average detection scores without documented weighting
+- add Kafka/Redis/microservices unnecessarily
+- copy an existing SIEM's architecture wholesale
+- claim production readiness without real testing
+- perform unauthorized scans or attacks against systems you don't
+  own or have permission to test
+- include real credentials, upload sensitive logs, or use real
+  victim data
+- obscure why an alert fired
+- rely on a single benchmark dataset for headline claims
+
+============================================================
+32. ROLE OF AI / LLM IN THE SYSTEM
+============================================================
+
+The core detection system must NOT depend on an LLM. Deterministic,
+statistical, and ML components must work correctly with no LLM
+involved at all.
+
+An optional LLM layer may assist with: summarizing incidents,
+explaining technical alerts in natural language, generating
+investigation summaries, and answering questions about stored
+evidence — never as the source of truth for detection.
+
+Example:
+  Detection engine: "42 authentication failures in 90 seconds."
+  LLM (optional): "These events may indicate a brute-force attempt
+                    because..."
+The underlying evidence remains authoritative regardless of what the
+LLM layer says.
+
+============================================================
+33. FINAL DEMO SCENARIO
+============================================================
+
+One polished end-to-end demonstration, built on the synthetic
+scenario from Phase 17:
+
+ 1. Normal activity occurs.
+ 2. A synthetic reconnaissance pattern appears.
+ 3. Repeated connection attempts occur.
+ 4. Authentication failures increase.
+ 5. A successful authentication occurs.
+ 6. Post-authentication behavior becomes abnormal.
+ 7. Outbound data volume increases.
+ 8. Detector correlates the events.
+ 9. Incident is created.
+10. Risk score increases.
+11. Dashboard displays the incident timeline.
+12. ATT&CK techniques are shown where defensible.
+13. Analyst can inspect the underlying evidence.
+14. Evaluation system records whether the detection was correct.
+
+The demo should visibly show the system reasoning as:
+  EVENT -> SIGNAL -> EVIDENCE -> CORRELATION -> INCIDENT
+
+============================================================
+34. FINAL ENGINEERING PRINCIPLES
+============================================================
+
+ 1. Correctness before complexity.
+ 2. Evidence before conclusions.
+ 3. Reproducibility before impressive claims.
+ 4. Explainability before black-box predictions.
+ 5. Evaluation before optimization.
+ 6. Security before convenience.
+ 7. Modular architecture before feature accumulation.
+ 8. Build the CORE checkpoint before EXTENDED features.
+ 9. Measure every major improvement — don't assume it helped.
+10. Document limitations honestly, including what you didn't get to.
+
+The final project should feel like a small defensive security
+product/research system — not a classroom ML script padded with
+buzzwords.
+
+============================================================
+35. INSTRUCTIONS TO CLAUDE
+============================================================
+
+Use this document as the master specification.
+
+When implementing:
+ 1. Start with Phase 0. Do not jump directly to advanced phases.
+ 2. Explain important architectural decisions briefly as you go.
+ 3. Produce complete files when implementing code changes — no
+    partial patches requiring the developer to locate insertion
+    points manually.
+ 4. Keep modules separated by responsibility (match Section 6).
+ 5. Write tests alongside important components, not after the fact.
+ 6. Run tests after every significant change.
+ 7. Do not invent benchmark results or metrics.
+ 8. If an assumption is necessary, state it explicitly.
+ 9. Prefer simple dependencies unless a new one provides clear,
+    stated value.
+10. Keep the system runnable after each phase — never leave it in a
+    broken intermediate state between sessions.
+11. Maintain the README as the project evolves.
+12. Maintain CHANGELOG.md with dated entries per phase.
+13. Use type hints throughout.
+14. Use structured logging, not print statements.
+15. Handle errors explicitly — no silent failures.
+16. Keep configuration externalized (YAML/env), not hardcoded.
+17. Avoid hardcoded thresholds where a config value is practical.
+18. Version model artifacts and detection rules.
+19. Make evaluation reproducible (fixed seeds, documented splits).
+20. Never target unauthorized real-world systems.
+21. Keep all cybersecurity experimentation defensive and controlled.
+22. Respect the CORE / EXTENDED / ADVANCED checkpoints in Section 3
+    — confirm CORE works end-to-end before starting EXTENDED work.
+
+At the end of every phase, report:
+- What was implemented
+- Files created/modified
+- How it works
+- Tests added and tests executed (with pass/fail status)
+- Current limitations
+- Next phase
+- Any decisions that need developer approval before proceeding
+
+Do not skip directly to the final system.
+
+============================================================
+36. END STATE
+============================================================
+
+The desired final system is a modular, explainable, reproducible
+cybersecurity threat detection platform capable of ingesting
+security events, identifying anomalies through multiple
+complementary approaches, correlating related activity into
+incidents, assigning transparent risk and confidence scores, mapping
+supported activity to MITRE ATT&CK techniques, exposing results
+through an API, visualizing them through a dashboard, and
+demonstrating its effectiveness through rigorous, honestly-reported
+evaluation.
+
+The project should be technically impressive because of its
+engineering discipline, detection methodology, evaluation quality,
+and explainability — not because it contains a large number of
+buzzword technologies.
+
+END OF SPECIFICATION
