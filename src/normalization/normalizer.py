@@ -25,7 +25,9 @@ logger = get_logger(__name__)
 class EventNormalizer:
     """Normalizes heterogeneous event records into validated SecurityEvents."""
 
-    def __init__(self, profile_name: str | None = None, custom_aliases: dict[str, list[str]] | None = None) -> None:
+    def __init__(
+        self, profile_name: str | None = None, custom_aliases: dict[str, list[str]] | None = None
+    ) -> None:
         self.profile: MappingProfile | None = PROFILES.get(profile_name) if profile_name else None
         self.aliases = {**DEFAULT_FIELD_ALIASES, **(custom_aliases or {})}
         # Invert aliases for fast lookup: alias_lower -> canonical_field

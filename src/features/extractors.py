@@ -32,7 +32,7 @@ def extract_flow_features(event: SecurityEvent) -> dict[str, float]:
     duration = float(event.duration or 0.0)
 
     bytes_per_sec = (bytes_total / duration) if duration > 0 else 0.0
-    bytes_ratio = (bytes_sent / (bytes_total + 1e-5))
+    bytes_ratio = bytes_sent / (bytes_total + 1e-5)
 
     return {
         "bytes_sent": bytes_sent,

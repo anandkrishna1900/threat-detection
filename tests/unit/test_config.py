@@ -1,24 +1,27 @@
 """Unit tests for src/common/config.py (AppConfig)."""
 
-
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from pydantic import ValidationError
+
+if TYPE_CHECKING:
+    from src.common.config import AppConfig
 
 
 class TestAppConfigDefaults:
     """AppConfig should load with sane defaults when no env is set."""
 
-    def test_default_app_env(self, sample_config: object) -> None:
+    def test_default_app_env(self, sample_config: AppConfig) -> None:
         assert sample_config.app_env == "test"  # overridden by minimal_env fixture
 
-    def test_default_app_version(self, sample_config: object) -> None:
+    def test_default_app_version(self, sample_config: AppConfig) -> None:
         assert sample_config.app_version == "0.1.0"
 
-    def test_default_log_level_is_debug_in_test(self, sample_config: object) -> None:
+    def test_default_log_level_is_debug_in_test(self, sample_config: AppConfig) -> None:
         # minimal_env sets LOG_LEVEL=DEBUG
         assert sample_config.log_level == "DEBUG"
 
@@ -29,22 +32,22 @@ class TestAppConfigDefaults:
         cfg = get_config()
         assert cfg.api_port == 8000
 
-    def test_default_rules_enabled(self, sample_config: object) -> None:
+    def test_default_rules_enabled(self, sample_config: AppConfig) -> None:
         assert sample_config.rules_enabled is True
 
-    def test_default_ml_enabled(self, sample_config: object) -> None:
+    def test_default_ml_enabled(self, sample_config: AppConfig) -> None:
         assert sample_config.ml_enabled is True
 
-    def test_default_behavioral_enabled(self, sample_config: object) -> None:
+    def test_default_behavioral_enabled(self, sample_config: AppConfig) -> None:
         assert sample_config.behavioral_enabled is True
 
-    def test_model_dir_is_path(self, sample_config: object) -> None:
+    def test_model_dir_is_path(self, sample_config: AppConfig) -> None:
         assert isinstance(sample_config.model_dir, Path)
 
-    def test_config_dir_is_path(self, sample_config: object) -> None:
+    def test_config_dir_is_path(self, sample_config: AppConfig) -> None:
         assert isinstance(sample_config.config_dir, Path)
 
-    def test_data_dir_is_path(self, sample_config: object) -> None:
+    def test_data_dir_is_path(self, sample_config: AppConfig) -> None:
         assert isinstance(sample_config.data_dir, Path)
 
 
@@ -112,14 +115,12 @@ class TestAppConfigEnvOverrides:
 class TestAppConfigSingleton:
     """get_config() must return the same instance within a process."""
 
-    def test_same_object_on_repeated_calls(self, sample_config: object) -> None:
+    def test_same_object_on_repeated_calls(self, sample_config: AppConfig) -> None:
         from src.common.config import get_config
 
         assert get_config() is get_config()
 
-    def test_cache_clear_returns_new_instance(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_cache_clear_returns_new_instance(self, monkeypatch: pytest.MonkeyPatch) -> None:
         from src.common.config import get_config
 
         monkeypatch.setenv("APP_ENV", "test")

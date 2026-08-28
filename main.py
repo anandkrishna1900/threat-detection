@@ -1,9 +1,9 @@
 """CLI entry point for the Hybrid Cybersecurity Threat Detection Platform."""
 
-
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 
 
@@ -12,7 +12,7 @@ def _cmd_version(args: argparse.Namespace) -> None:  # noqa: ARG001
     from src.common.config import get_config
 
     cfg = get_config()
-    print(f"Threat Detection Platform")
+    print("Threat Detection Platform")
     print(f"  Version  : {cfg.app_version}")
     print(f"  Env      : {cfg.app_env}")
     print(f"  Python   : {sys.version.split()[0]}")
@@ -59,8 +59,7 @@ def _cmd_status(args: argparse.Namespace) -> None:  # noqa: ARG001
     print()
 
 
-
-def _cmd_start(args: argparse.Namespace) -> None:
+def _cmd_start(args: argparse.Namespace) -> None:  # noqa: ARG001
     """Start the FastAPI API server (available from Phase 14)."""
     print("API server not yet implemented — this will be available in Phase 14.")
     print("Run `python main.py status` to check current platform status.")
@@ -104,8 +103,6 @@ def build_parser() -> argparse.ArgumentParser:
 
 def cli_main() -> None:
     """Parse arguments, configure logging, dispatch to command handler."""
-    import os
-
     parser = build_parser()
     args = parser.parse_args()
 

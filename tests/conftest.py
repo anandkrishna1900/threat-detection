@@ -9,10 +9,13 @@ explicit imports — pytest discovers them automatically.
 
 from __future__ import annotations
 
-import os
 from collections.abc import Generator
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from src.common.config import AppConfig
 
 
 @pytest.fixture(autouse=True)
@@ -44,7 +47,7 @@ def minimal_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture()
-def sample_config(minimal_env: None) -> object:  # noqa: ANN001
+def sample_config(minimal_env: None) -> AppConfig:
     """Return a freshly-constructed AppConfig in test mode."""
     from src.common.config import get_config
 

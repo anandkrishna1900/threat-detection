@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Any
 
 from src.ingestion.models import SecurityEvent
@@ -59,14 +58,27 @@ class EntityStateTracker:
         event_ts = event.timestamp.timestamp()
         history.prune(event_ts, max_window_sec=self.max_history_sec)
 
-        time_since_last = (event_ts - history.last_seen_ts) if history.last_seen_ts is not None else 0.0
+        time_since_last = (
+            (event_ts - history.last_seen_ts) if history.last_seen_ts is not None else 0.0
+        )
         history.last_seen_ts = event_ts
 
         # Determine authentication flags
         is_auth_failed = False
         is_auth_success = False
-        if event.event_type == "authentication" or event.action in ("login", "auth", "authenticate", "failed", "success"):
-            if event.action == "failed" or event.status in ("failed", "failure", "FAILURE", "error"):
+        if event.event_type == "authentication" or event.action in (
+            "login",
+            "auth",
+            "authenticate",
+            "failed",
+            "success",
+        ):
+            if event.action == "failed" or event.status in (
+                "failed",
+                "failure",
+                "FAILURE",
+                "error",
+            ):
                 is_auth_failed = True
             elif event.action == "success" or event.status in ("success", "SUCCESS", "ok"):
                 is_auth_success = True

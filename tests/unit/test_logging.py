@@ -1,10 +1,6 @@
 """Unit tests for src/common/logging_setup.py."""
 
-
 from __future__ import annotations
-
-import io
-import logging
 
 import pytest
 import structlog
@@ -42,18 +38,14 @@ class TestGetLogger:
 class TestConfigureLogging:
     """configure_logging should configure structlog without raising."""
 
-    def test_console_format_does_not_raise(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_console_format_does_not_raise(self, monkeypatch: pytest.MonkeyPatch) -> None:
         from src.common.config import AppConfig
         from src.common.logging_setup import configure_logging
 
         cfg = AppConfig(app_env="test", log_level="DEBUG", log_format="console")
         configure_logging(cfg)  # must not raise
 
-    def test_json_format_does_not_raise(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_json_format_does_not_raise(self, monkeypatch: pytest.MonkeyPatch) -> None:
         from src.common.config import AppConfig
         from src.common.logging_setup import configure_logging
 

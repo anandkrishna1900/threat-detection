@@ -11,7 +11,9 @@ from src.ingestion.base import DataSource
 class SyntheticSource(DataSource):
     """Yields records from an in-memory iterable or generator."""
 
-    def __init__(self, records: Iterable[dict[str, Any]], source_id: str = "synthetic:in_memory") -> None:
+    def __init__(
+        self, records: Iterable[dict[str, Any]], source_id: str = "synthetic:in_memory"
+    ) -> None:
         super().__init__(source_id=source_id)
         self.records = records
 

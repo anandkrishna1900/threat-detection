@@ -75,7 +75,6 @@ class AppConfig(BaseSettings):
         return Path(str(v))
 
 
-
 @functools.lru_cache(maxsize=1)
 def get_config() -> AppConfig:
     """

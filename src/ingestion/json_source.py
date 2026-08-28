@@ -38,12 +38,16 @@ class JSONSource(DataSource):
                     yield item
                 else:
                     self.stats.record_failure(item, f"Item at index {idx} is not a JSON object")
-                    self.logger.warning("json_skip_non_object", index=idx, item_type=type(item).__name__)
+                    self.logger.warning(
+                        "json_skip_non_object", index=idx, item_type=type(item).__name__
+                    )
         elif isinstance(data, dict):
             self.stats.record_success()
             yield data
         else:
-            self.stats.record_failure(data, f"Root JSON is neither a list nor an object: {type(data).__name__}")
+            self.stats.record_failure(
+                data, f"Root JSON is neither a list nor an object: {type(data).__name__}"
+            )
             self.logger.warning("json_root_not_object_or_list", root_type=type(data).__name__)
 
 
@@ -72,7 +76,9 @@ class JSONLinesSource(DataSource):
                         self.stats.record_success()
                         yield record
                     else:
-                        self.stats.record_failure(clean_line, f"Line {line_idx} is not a JSON object")
+                        self.stats.record_failure(
+                            clean_line, f"Line {line_idx} is not a JSON object"
+                        )
                         self.logger.warning("jsonl_skip_non_object", line=line_idx)
                 except json.JSONDecodeError as exc:
                     self.stats.record_failure(clean_line, f"Line {line_idx} invalid JSON: {exc}")
