@@ -142,7 +142,7 @@ Confidence: HIGH  |  Note: This is a suspected, not confirmed, attack.
 | Phase | Name | Status |
 |-------|------|--------|
 | 0 | Project Foundation | ✅ **Complete** |
-| 1 | Data Ingestion | 🔲 Not started |
+| 1 | Data Ingestion | ✅ **Complete** |
 | 2 | Event Normalization | 🔲 Not started |
 | 3 | Feature Engineering | 🔲 Not started |
 | 4 | Rule-Based Detection | 🔲 Not started |

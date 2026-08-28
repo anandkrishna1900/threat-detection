@@ -11,7 +11,17 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [0.1.0] — 2026-08-28 — Phase 0: Project Foundation
+## [0.2.0] — 2026-08-28 — Phase 1: Data Ingestion
+
+### Added
+- `src/ingestion/models.py` — Canonical `SecurityEvent` Pydantic model with validation, ISO timestamp parsing, protocol uppercase normalization, and full raw_data preservation.
+- `src/ingestion/base.py` — Abstract `DataSource` interface and `IngestionStats` metrics tracker (records read, yielded, skipped, and explicit error capture).
+- `src/ingestion/csv_source.py` — `CSVSource` streaming reader with skip-and-log error handling for blank and malformed rows.
+- `src/ingestion/json_source.py` — `JSONSource` (supporting single objects and object arrays) and `JSONLinesSource` for .jsonl files.
+- `src/ingestion/synthetic_source.py` — `SyntheticSource` for in-memory and programmatic streams.
+- `data/raw/` sample datasets: `sample_auth_events.csv`, `sample_network_events.json`, `sample_mixed_events.jsonl`.
+- `tests/unit/test_ingestion.py` — 12 unit tests covering all source formats, stats metrics, error tracking, and model constraints.
+
 
 ### Added
 - Full repository directory structure matching spec Section 6
