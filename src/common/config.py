@@ -1,16 +1,4 @@
-"""
-src/common/config.py
---------------------
-Application configuration loader.
-
-Priority (highest to lowest):
-  1. Environment variables
-  2. .env file (via python-dotenv)
-  3. Defaults defined in AppConfig
-
-All configuration is available as a singleton via `get_config()`.
-Type hints are enforced by pydantic-settings.
-"""
+"""Application configuration loader."""
 
 from __future__ import annotations
 
@@ -23,34 +11,21 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class AppConfig(BaseSettings):
-    """
-    Central application configuration.
-
-    Values are read from environment variables (case-insensitive) and
-    from a .env file if present. YAML-based rule/model configs are loaded
-    separately by their respective modules; this class handles only
-    infrastructure settings.
-    """
+    """Central application configuration."""
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
-        extra="ignore",  # silently ignore unknown env vars
+        extra="ignore",
     )
 
-    # -------------------------------------------------------------------------
-    # Application
-    # -------------------------------------------------------------------------
     app_env: Literal["development", "production", "test"] = Field(
         default="development",
         description="Runtime environment tag.",
     )
     app_version: str = Field(default="0.1.0", description="Semantic version string.")
 
-    # -------------------------------------------------------------------------
-    # Logging
-    # -------------------------------------------------------------------------
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
         default="INFO",
         description="Minimum log level to emit.",
@@ -60,27 +35,18 @@ class AppConfig(BaseSettings):
         description="'json' for machine-readable output; 'console' for human-readable.",
     )
 
-    # -------------------------------------------------------------------------
-    # Database
-    # -------------------------------------------------------------------------
     database_url: str = Field(
         default="sqlite:///./data/threat_detection.db",
         description="SQLAlchemy database connection URL.",
     )
 
-    # -------------------------------------------------------------------------
-    # API server
-    # -------------------------------------------------------------------------
     api_host: str = Field(default="0.0.0.0", description="Bind address for the API server.")
     api_port: int = Field(default=8000, ge=1, le=65535, description="TCP port for the API server.")
     api_reload: bool = Field(
         default=False,
-        description="Enable uvicorn auto-reload. Only safe in development.",
+        description="Enable uvicorn auto-reload.",
     )
 
-    # -------------------------------------------------------------------------
-    # Paths
-    # -------------------------------------------------------------------------
     model_dir: Path = Field(
         default=Path("./models"),
         description="Directory for persisted model artifacts.",
@@ -94,14 +60,8 @@ class AppConfig(BaseSettings):
         description="Root data directory.",
     )
 
-    # -------------------------------------------------------------------------
-    # Model
-    # -------------------------------------------------------------------------
     model_version: str = Field(default="v1", description="Active model artifact version tag.")
 
-    # -------------------------------------------------------------------------
-    # Detection switches
-    # -------------------------------------------------------------------------
     rules_enabled: bool = Field(default=True, description="Enable rule-based detection engine.")
     ml_enabled: bool = Field(default=True, description="Enable ML anomaly detection engine.")
     behavioral_enabled: bool = Field(
@@ -109,14 +69,11 @@ class AppConfig(BaseSettings):
         description="Enable behavioral baseline engine.",
     )
 
-    # -------------------------------------------------------------------------
-    # Validators
-    # -------------------------------------------------------------------------
     @field_validator("model_dir", "config_dir", "data_dir", mode="before")
     @classmethod
     def _coerce_path(cls, v: object) -> Path:
-        """Accept string or Path values."""
         return Path(str(v))
+
 
 
 @functools.lru_cache(maxsize=1)

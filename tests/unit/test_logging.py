@@ -1,15 +1,5 @@
-"""
-tests/unit/test_logging.py
---------------------------
-Unit tests for src/common/logging_setup.py.
+"""Unit tests for src/common/logging_setup.py."""
 
-Tests verify:
-  - configure_logging() runs without error in both formats
-  - get_logger() returns a usable logger
-  - Loggers produce output (smoke test — we do not parse structured output
-    here because structlog's test utilities are overkill for Phase 0)
-  - Calling configure_logging() twice does not raise
-"""
 
 from __future__ import annotations
 

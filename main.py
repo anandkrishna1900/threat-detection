@@ -1,22 +1,5 @@
-"""
-main.py
--------
-CLI entry point for the Hybrid Cybersecurity Threat Detection Platform.
+"""CLI entry point for the Hybrid Cybersecurity Threat Detection Platform."""
 
-Commands
---------
-  python main.py version   — Print version and environment info
-  python main.py status    — Print configuration and component status
-  python main.py start     — Start the FastAPI server (Phase 14+)
-
-Design decisions
-----------------
-- Uses argparse (stdlib) rather than Click/Typer to keep zero additional
-  dependencies at Phase 0. This will be revisited in Phase 14.
-- All heavy imports are done inside command handlers so `main.py version`
-  is always fast even if optional dependencies are missing.
-- Logging is configured before any command runs.
-"""
 
 from __future__ import annotations
 

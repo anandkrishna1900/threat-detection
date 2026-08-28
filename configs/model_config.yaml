@@ -1,55 +1,29 @@
-# configs/model_config.yaml
-# --------------------------
-# Configuration for ML anomaly detection models (Phase 6).
-#
-# Decision: Isolation Forest is the initial algorithm (unsupervised,
-# no labels required, handles multi-feature input, practical for anomaly
-# detection in security contexts).
-#
-# One-Class SVM and Autoencoder are listed as optional comparison
-# experiments only — their results must NOT be blended into the primary
-# unsupervised detection narrative without clearly labeling them as
-# separate experiments.
-
+# Model configuration
 version: "1.0"
 
 isolation_forest:
-  # scikit-learn IsolationForest parameters
-  n_estimators: 200          # number of trees — higher = more stable, slower
-  max_samples: "auto"        # "auto" uses min(256, n_samples)
-  contamination: 0.05        # estimated fraction of anomalies in training data
-                             # (5% is a conservative starting point — calibrate
-                             # empirically against your validation split)
-  max_features: 1.0          # fraction of features per tree
+  n_estimators: 200
+  max_samples: "auto"
+  contamination: 0.05
+  max_features: 1.0
   bootstrap: false
-  random_state: 42           # fixed seed for reproducibility (must never change
-                             # once a model version is committed)
-  n_jobs: -1                 # use all available CPU cores
+  random_state: 42
+  n_jobs: -1
+  threshold_strategy: "contamination"
+  manual_threshold: null
+  scaler: "standard"
+  handle_missing: "median"
 
-  # Threshold calibration
-  # The decision threshold is set so that approximately `contamination`
-  # fraction of training samples are flagged as anomalous.  After training,
-  # validate against held-out labeled data and adjust if needed.
-  # Document any manual adjustment in evaluation/model_calibration.md.
-  threshold_strategy: "contamination"  # "contamination" | "percentile" | "manual"
-  manual_threshold: null               # used only when threshold_strategy = "manual"
-
-  # Preprocessing
-  scaler: "standard"         # "standard" (Z-score) | "minmax" | "robust"
-  handle_missing: "median"   # "median" | "mean" | "zero" — applied per column
-
-# Optional comparison models (Phase 6, advanced experiments only)
 one_class_svm:
   enabled: false
   kernel: "rbf"
   nu: 0.05
   gamma: "scale"
 
-# Feature selection (populated in Phase 3/6 — stubbed here)
 feature_sets:
   network:
     enabled: true
-    features: []   # filled by Phase 3 feature engineering
+    features: []
   authentication:
     enabled: true
     features: []
@@ -60,11 +34,7 @@ feature_sets:
     enabled: true
     features: []
 
-# Artifact versioning
 artifact:
   version: "v1"
   save_dir: "./models"
-  # Files saved per model version:
-  #   models/v1/isolation_forest.joblib
-  #   models/v1/preprocessor.joblib
-  #   models/v1/metadata.json
+

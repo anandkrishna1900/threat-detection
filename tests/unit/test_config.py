@@ -1,15 +1,5 @@
-"""
-tests/unit/test_config.py
--------------------------
-Unit tests for src/common/config.py (AppConfig).
+"""Unit tests for src/common/config.py (AppConfig)."""
 
-Tests verify:
-  - Default values are sensible
-  - Environment variable overrides work correctly
-  - Singleton pattern is enforced (same object on repeated calls)
-  - Invalid values raise ValidationError
-  - Path coercion works for path-typed fields
-"""
 
 from __future__ import annotations
 

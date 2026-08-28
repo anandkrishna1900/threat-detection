@@ -1,23 +1,6 @@
-# configs/detection_rules.yaml
-# -----------------------------
-# Rule definitions for the rule-based detection engine (Phase 4).
-#
-# Each rule entry must have:
-#   id          : unique string identifier
-#   name        : human-readable name
-#   description : what the rule detects
-#   severity    : LOW | MEDIUM | HIGH | CRITICAL
-#   enabled     : true | false  (allows hot-disable without deletion)
-#   conditions  : engine-specific condition block (defined in Phase 4)
-#   threshold   : numeric trigger threshold
-#   window_sec  : time window in seconds for count-based rules
-#   mitre       : list of MITRE ATT&CK technique IDs (e.g. T1110)
-#
-# ⚠  All rules are DISABLED until Phase 4 is implemented.
-#    Enabling them before the engine is ready has no effect —
-#    the engine will ignore unrecognised condition types.
-
+# Detection rules configuration
 version: "1.0"
+
 
 rules:
   - id: BRUTE_FORCE_001

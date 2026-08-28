@@ -1,66 +1,38 @@
-# configs/risk_config.yaml
-# -------------------------
-# Risk scoring weights and severity thresholds (Phase 7 / Phase 12).
-#
-# IMPORTANT: These defaults are starting points only.
-# They must be validated empirically against your evaluation set after
-# Phase 7 is complete. Document any weight adjustments in
-# docs/evaluation.md, including what metric improved and by how much.
-# Do not claim the weights are "optimized" unless you ran a systematic
-# search — state that they were tuned heuristically if that is the case.
-
+# Risk scoring configuration
 version: "1.0"
 
-# ---------------------------------------------------------------------------
-# Component weights for per-event hybrid risk score (Phase 7)
-# Sum of base weights should equal 1.0 (correlation_bonus is additive)
-# ---------------------------------------------------------------------------
 hybrid_weights:
-  rule_score: 0.45          # Rule-based signals are high-precision
-  behavior_score: 0.30      # Behavioral anomaly provides context
-  ml_score: 0.25            # ML score is broad signal, lower weight initially
+  rule_score: 0.45
+  behavior_score: 0.30
+  ml_score: 0.25
 
-# Correlation bonus: added when multiple signals co-occur (0–20 points)
-# Applied in Phase 9 after correlation engine is built.
 correlation_bonus:
-  enabled: false            # enabled in Phase 9
-  max_bonus: 20             # maximum additive bonus
-  per_correlated_event: 2   # bonus per additional correlated event
+  enabled: false
+  max_bonus: 20
+  per_correlated_event: 2
 
-# ---------------------------------------------------------------------------
-# Severity thresholds for individual events
-# ---------------------------------------------------------------------------
 severity_thresholds:
   LOW:      { min: 0,  max: 24 }
   MEDIUM:   { min: 25, max: 49 }
   HIGH:     { min: 50, max: 74 }
   CRITICAL: { min: 75, max: 100 }
 
-# ---------------------------------------------------------------------------
-# Incident-level risk engine (Phase 12)
-# ---------------------------------------------------------------------------
 incident_risk_weights:
-  rule: 0.36          # Σ rule contribution across correlated events
-  behavior: 0.24      # Σ behavioral anomaly scores
-  ml: 0.20            # Σ ML anomaly scores
-  correlation: 0.12   # Correlation quality factor
-  impact: 0.08        # Estimated impact (entity count, data volume)
+  rule: 0.36
+  behavior: 0.24
+  ml: 0.20
+  correlation: 0.12
+  impact: 0.08
 
-# Score normalisation: each component is normalised to 0–100 before
-# being multiplied by its weight, then summed and clamped to 0–100.
 normalise_components: true
 clamp_min: 0
 clamp_max: 100
 
-# ---------------------------------------------------------------------------
-# Confidence mapping
-# ---------------------------------------------------------------------------
 confidence_bands:
-  # Confidence is a separate dimension from severity
   LOW:    { min: 0.0,  max: 0.39 }
   MEDIUM: { min: 0.40, max: 0.69 }
   HIGH:   { min: 0.70, max: 0.89 }
   VERY_HIGH: { min: 0.90, max: 1.0 }
 
-# Minimum evidence count before CRITICAL severity is assigned
 min_evidence_for_critical: 3
+
