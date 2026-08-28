@@ -7,11 +7,11 @@ from src.ingestion.models import SecurityEvent
 from src.ingestion.synthetic_source import SyntheticSource
 
 __all__ = [
+    "CSVSource",
     "DataSource",
     "IngestionStats",
-    "CSVSource",
-    "JSONSource",
     "JSONLinesSource",
-    "SyntheticSource",
+    "JSONSource",
     "SecurityEvent",
+    "SyntheticSource",
 ]

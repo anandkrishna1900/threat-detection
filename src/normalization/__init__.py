@@ -13,15 +13,15 @@ from src.normalization.parsers import (
 )
 
 __all__ = [
+    "DEFAULT_FIELD_ALIASES",
     "EventNormalizer",
     "MappingProfile",
     "PROFILES",
-    "DEFAULT_FIELD_ALIASES",
-    "normalize_timestamp",
+    "normalize_float",
+    "normalize_int",
     "normalize_ip",
     "normalize_port",
     "normalize_protocol",
-    "normalize_int",
-    "normalize_float",
     "normalize_string",
+    "normalize_timestamp",
 ]
