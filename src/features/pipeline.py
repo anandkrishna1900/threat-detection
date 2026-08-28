@@ -67,8 +67,8 @@ class FeaturePipeline:
         for event in events:
             fv = self.process_event(event)
             row: dict[str, Any] = fv.to_numeric_dict()
-            row["event_id"] = fv.event_id
-            row["entity_id"] = fv.entity_id
+            row["event_id"] = str(fv.event_id)
+            row["entity_id"] = str(fv.entity_id)
             rows.append(row)
 
         try:
