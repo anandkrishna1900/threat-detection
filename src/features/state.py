@@ -59,7 +59,9 @@ class EntityStateTracker:
         history.prune(event_ts, max_window_sec=self.max_history_sec)
 
         time_since_last = (
-            (event_ts - history.last_seen_ts) if history.last_seen_ts is not None else 0.0
+            (event_ts - history.last_seen_ts)
+            if history.last_seen_ts is not None
+            else 0.0
         )
         history.last_seen_ts = event_ts
 
@@ -80,7 +82,11 @@ class EntityStateTracker:
                 "error",
             ):
                 is_auth_failed = True
-            elif event.action == "success" or event.status in ("success", "SUCCESS", "ok"):
+            elif event.action == "success" or event.status in (
+                "success",
+                "SUCCESS",
+                "ok",
+            ):
                 is_auth_success = True
 
         rec = WindowRecord(
@@ -137,7 +143,9 @@ class EntityStateTracker:
                         auth_failed_1m += 1
 
         total_auth_5m = auth_failed_5m + auth_success_5m
-        auth_fail_ratio_5m = (auth_failed_5m / total_auth_5m) if total_auth_5m > 0 else 0.0
+        auth_fail_ratio_5m = (
+            (auth_failed_5m / total_auth_5m) if total_auth_5m > 0 else 0.0
+        )
 
         return {
             "entity_id": entity_key,
