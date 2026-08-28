@@ -143,7 +143,7 @@ Confidence: HIGH  |  Note: This is a suspected, not confirmed, attack.
 |-------|------|--------|
 | 0 | Project Foundation | ✅ **Complete** |
 | 1 | Data Ingestion | ✅ **Complete** |
-| 2 | Event Normalization | 🔲 Not started |
+| 2 | Event Normalization | ✅ **Complete** |
 | 3 | Feature Engineering | 🔲 Not started |
 | 4 | Rule-Based Detection | 🔲 Not started |
 | 5 | Behavioral Baselines | 🔲 Not started |

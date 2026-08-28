@@ -11,7 +11,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [0.2.0] — 2026-08-28 — Phase 1: Data Ingestion
+## [0.3.0] — 2026-08-28 — Phase 2: Event Normalization
+
+### Added
+- `src/normalization/parsers.py` — Value parsers for timestamps (ISO 8601, UNIX epoch sec/msec/microsec, custom datetime formats to UTC), IP validation and port cleanup, port bounds validation (0-65535), protocol code/name mapping (IANA protocols), and numeric/string normalization.
+- `src/normalization/field_mappings.py` — Canonical field alias dictionary covering heterogeneous schemas and pre-built dataset mapping profiles (`cic_ids`, `unsw_nb15`, `zeek_conn`).
+- `src/normalization/normalizer.py` — `EventNormalizer` engine converting raw records/streams into canonical `SecurityEvent`s while preserving original `raw_data`.
+- `tests/unit/test_normalization.py` — 12 unit tests covering all parser functions, alias resolution, mapping profiles, and stream normalization.
+
 
 ### Added
 - `src/ingestion/models.py` — Canonical `SecurityEvent` Pydantic model with validation, ISO timestamp parsing, protocol uppercase normalization, and full raw_data preservation.
