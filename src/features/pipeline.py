@@ -66,16 +66,13 @@ class FeaturePipeline:
         rows: list[dict[str, Any]] = []
         for event in events:
             fv = self.process_event(event)
-            row: dict[str, Any] = {
-                "event_id": fv.event_id,
-                "entity_id": fv.entity_id,
-                **fv.to_numeric_dict(),
-            }
+            row: dict[str, Any] = fv.to_numeric_dict()
+            row["event_id"] = fv.event_id
+            row["entity_id"] = fv.entity_id
             rows.append(row)
 
         try:
             import pandas as pd
-
             return pd.DataFrame(rows)
         except Exception:
             return rows

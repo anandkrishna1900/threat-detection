@@ -31,6 +31,7 @@ def configure_logging(config: AppConfig) -> None:
         structlog.processors.StackInfoRenderer(),
     ]
 
+
     if config.log_format == "json":
         processors: list[Any] = [
             *shared_processors,
@@ -54,4 +55,4 @@ def configure_logging(config: AppConfig) -> None:
 
 def get_logger(name: str = __name__) -> structlog.BoundLogger:
     """Return a bound structlog logger for name."""
-    return structlog.get_logger(name)  # type: ignore[return-value,no-any-return]
+    return structlog.get_logger(name)  # type: ignore[no-any-return]
